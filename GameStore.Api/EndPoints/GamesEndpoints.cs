@@ -7,13 +7,15 @@ public static class GamesEndpoints
   const string GetGameEndPointName = "GetGame";
   private static readonly List<GameDto> games = [new(1, "Street Fighter II", "Fighting", 19.99M, new DateOnly(1992, 7, 15)), new(2, "Final Fantasy XIV", "Roleplaying", 59.99M, new DateOnly(2010, 9, 30)), new(3, "FIFA 23", "Sports", 69.99M, new DateOnly(2022, 9, 17))];
 
-  public static WebApplication MapGamesEndpoint(this WebApplication app)
+  public static RouteGroupBuilder MapGamesEndpoint(this WebApplication app)
   {
+
+    var group = app.MapGroup("games");
     // GET /games
-    app.MapGet("games", () => games);
+    group.MapGet("/", () => games);
 
     // GET /games/1
-    app.MapGet("games/{id}", (int id) =>
+    group.MapGet("/{id}", (int id) =>
     {
       GameDto? game = games.Find(game => game.Id == id);
 
@@ -22,7 +24,7 @@ public static class GamesEndpoints
     }).WithName(GetGameEndPointName);
 
     // POST /games
-    app.MapPost("games", (CreateGameDto newGame) =>
+    group.MapPost("/", (CreateGameDto newGame) =>
     {
       GameDto game = new(games.Count + 1, newGame.Name, newGame.Genre, newGame.Price, newGame.ReleaseDate);
       games.Add(game);
@@ -31,7 +33,7 @@ public static class GamesEndpoints
     });
 
     // PUT /games/1
-    app.MapPut("games/{id}", (int id, UpdateGameDto updateGame) =>
+    group.MapPut("/{id}", (int id, UpdateGameDto updateGame) =>
     {
 
       var index = games.FindIndex(game => game.Id == id);
@@ -45,13 +47,13 @@ public static class GamesEndpoints
     });
 
     // DELETE /games/1
-    app.MapDelete("games/{id}", (int id) =>
+    group.MapDelete("/{id}", (int id) =>
     {
       games.RemoveAll(game => game.Id == id);
       return Results.NoContent();
     });
 
-    return app;
+    return group;
 
 
   }
